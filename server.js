@@ -7,24 +7,21 @@ const server = http.createServer();
 
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:5173"], // Sesuaikan dengan frontend Anda
+    origin: ["http://localhost:5173","https://www.sinicrita.id", "https://sinicrita.id"],
     methods: ["GET", "POST"]
   }
 });
 
-// Mapping userId ke socketId
 const userSocketMap = new Map();
 
 io.on('connection', (socket) => {
   console.log('WebSocket client connected:', socket.id);
 
-  // Register userId ke socket
   socket.on('register', (userId) => {
     userSocketMap.set(userId, socket.id);
     console.log(`User ${userId} registered with socket ${socket.id}`);
   });
 
-  // Terima offer dari user
   socket.on('offer', (data) => {
     const targetSocketId = userSocketMap.get(data.targetUserId);
     if (targetSocketId) {
@@ -32,7 +29,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Terima answer dari user
   socket.on('answer', (data) => {
     const targetSocketId = userSocketMap.get(data.targetUserId);
     if (targetSocketId) {
@@ -40,7 +36,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Terima ICE candidate dari user
   socket.on('candidate', (data) => {
     const targetSocketId = userSocketMap.get(data.targetUserId);
     if (targetSocketId) {
@@ -48,7 +43,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Hapus mapping saat socket disconnect
   socket.on('disconnect', () => {
     console.log('WebSocket client disconnected:', socket.id);
     for (let [userId, socketId] of userSocketMap.entries()) {
